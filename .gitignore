@@ -75,6 +75,9 @@ archive/
 *.seed
 *.pid.lock
 
+# Local archive of legacy folders
+old_folders/
+
 # Package manager specific
 .pnpm-store/
 .yarn/
