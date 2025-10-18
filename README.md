@@ -1,98 +1,135 @@
-# A Moita - Website
+# A Moita — Refúgio Natural
 
-[![CI/CD](https://github.com/gomescarlosjunior/a-moita-v2/actions/workflows/ci-cd.yml/badge.svg?branch=main)](https://github.com/gomescarlosjunior/a-moita-v2/actions/workflows/ci-cd.yml)
+[![CI/CD](https://github.com/CoreGomes/moita/actions/workflows/ci-cd.yml/badge.svg?branch=main)](https://github.com/CoreGomes/moita/actions/workflows/ci-cd.yml)
 
-Site oficial da A Moita - Refúgio no Cerrado
+Site oficial da A Moita (`www.moitanativa.com.br`), destacando chalés, trilhas e experiências de ecoturismo no Cerrado. O projeto entrega uma landing page rica em conteúdo, com animações, galeria de fotos otimizada e integração com indicadores de ocupação.
 
-## Tecnologias
+## Visão Geral
 
-- Next.js 14
-- TypeScript
-- Tailwind CSS
-- Framer Motion
-- React Icons
+- **Objetivo**
+  Criar uma experiência digital envolvente para apresentar a pousada A Moita, capturar reservas e divulgar conteúdos ecológicos.
+- **Stack principal**
+  `Next.js 14.2.33`, `TypeScript`, `Tailwind CSS`, `Framer Motion`, `Swiper`, `React Icons`, `Zod`.
+- **Integrações**
+  Widgets Hostex (reservas), formulários via `react-hook-form`, métricas em tempo real com `swr` e `socket.io-client`.
+- **Deploy**
+  Automatizado pelo Vercel (produção) após validação do pipeline GitHub Actions.
 
-## Configuração do Ambiente
+## Estrutura do Repositório
 
-1. **Pré-requisitos**
-   - Node.js 18+
-   - pnpm 8+
+```
+moita/
+├─ public/
+│  ├─ assets/               # Logos, branding e galeria oficial
+│  ├─ css/tailwind/         # CSS exportado para versões estáticas
+│  ├─ about.html ...        # Páginas estáticas legadas para SEO
+│  └─ robots.txt            # Configuração de rastreamento
+├─ src/
+│  ├─ app/                  # App Router (layouts, páginas e APIs)
+│  │  ├─ page.tsx           # Landing principal com animações
+│  │  ├─ chaleAOrigem/      # Página dedicada aos chalés
+│  │  ├─ api/hostex/        # Rotas serverless para Hostex
+│  │  └─ globals.css        # Estilos globais baseados em Tailwind
+│  ├─ components/           # Componentes reutilizáveis (Hero, Galeria, CTA)
+│  ├─ hooks/hostex/         # Hooks de dados para dashboards Hostex
+│  ├─ lib/hostex/           # Client REST, cache e utilitários
+│  └─ types/                # Tipagens compartilhadas
+├─ .github/workflows/       # Pipelines CI/CD (format, lint, build, deploy)
+├─ old_folders/             # Backups e templates arquivados
+├─ README.md                # Este documento
+└─ ...                      # Configurações (Tailwind, PostCSS, TypeScript)
+```
 
-2. **Instalação**
+## Pré-requisitos
 
-   ```bash
-   # Instalar dependências
-   pnpm install
+- **Node.js 18.18+** (recomendado `pnpm env use --global 18`)
+- **pnpm 8.15.0**
+- Acesso ao repositório GitHub e conta Vercel vinculada ao projeto.
 
-   # Iniciar servidor de desenvolvimento
-   pnpm dev
-   ```
+Verifique versões instaladas:
 
-3. **Variáveis de Ambiente**
-   Crie um arquivo `.env.local` na raiz do projeto com as seguintes variáveis:
-   ```
-   NEXT_PUBLIC_SITE_URL=https://seu-site.vercel.app
-   ```
+```bash
+node -v
+pnpm -v
+```
 
-## Scripts Disponíveis
+## Setup Local
 
-- `pnpm dev` - Inicia o servidor de desenvolvimento
-- `pnpm build` - Gera a versão de produção
-- `pnpm start` - Inicia o servidor de produção
-- `pnpm lint` - Executa o ESLint
-- `pnpm lint:ci` - Lint estrito (falha com warnings)
-- `pnpm type-check` - Checagem de tipos TypeScript (sem emitir)
-- `pnpm format` - Formata o código com Prettier
-- `pnpm format:check` - Verifica formatação
-- `pnpm test` - Placeholder de testes (ajuste quando testes forem adicionados)
+```bash
+# 1. Clonar o repositório
+git clone https://github.com/CoreGomes/moita.git
+cd moita
 
-## Deploy
+# 2. Instalar dependências
+pnpm install
 
-O deploy é feito automaticamente através do Vercel quando há push para a branch `main`.
+# 3. Variáveis de ambiente (exemplo)
+cp .env.example .env.local
+# Edite .env.local conforme necessário (URLs públicas, Hostex, etc.)
 
-### CI/CD no GitHub Actions
+# 4. Rodar no modo desenvolvimento
+pnpm dev
+# Acesse http://localhost:3000
+```
 
-O pipeline executa as etapas abaixo para cada push/PR na `main`:
+### Scripts Úteis
 
-1. Check formatting (`pnpm format:check`)
-2. Type check (`pnpm type-check`)
-3. Lint estrito (`pnpm lint:ci`)
-4. Testes (`pnpm test`) — placeholder até a suíte ser implementada
-5. Build (`pnpm build`)
-6. Deploy na Vercel (apenas quando `refs/heads/main`)
+- `pnpm dev` — Servidor Next.js com Turbopack e HMR.
+- `pnpm build` — Build de produção (`.next/`).
+- `pnpm start` — Servidor de produção após `pnpm build`.
+- `pnpm lint` — ESLint com regras do Next.
+- `pnpm lint:ci` — ESLint strict (falha em warnings).
+- `pnpm type-check` — `tsc --noEmit` para segurança de tipos.
+- `pnpm format` / `pnpm format:check` — Prettier com Tailwind.
+- `pnpm test` — Placeholder (retorna sucesso até suite ser implementada).
 
-Em caso de falha, artefatos como `.next` e logs são carregados para análise no job.
+## Qualidade de Código
 
-### Segredos e Variáveis Requeridos
+- **Style & Lint**: ESLint + Prettier com plugin Tailwind.
+- **Type Safety**: TypeScript strict; validações runtime com `zod`.
+- **Performance**: `next/image`, otimização automática do Next, lazy loading, geração estática onde aplicável.
 
-Configure no GitHub (Settings → Secrets and variables → Actions):
+## CI/CD
 
-- Secrets
-  - `VERCEL_TOKEN`
-  - `VERCEL_ORG_ID`
-  - `VERCEL_PROJECT_ID`
-- Variables
-  - `NEXT_PUBLIC_SITE_URL` (ex.: `https://a-moita.vercel.app`)
+Workflow `ci-cd.yml` executa em PRs e pushes para `main`:
 
-### Verificação Manual do Pipeline
+1. Checkout + setup Node 20 / pnpm 8.15.0.
+2. `pnpm install --frozen-lockfile`.
+3. `pnpm format:check`, `pnpm type-check`, `pnpm lint:ci`, `pnpm test`.
+4. `pnpm build`.
+5. Disparo do hook `VERCEL_DEPLOY_HOOK_URL` (apenas `main`).
 
-1. Faça um commit na branch `main`.
-2. Acesse GitHub → Actions → workflow "CI/CD".
-3. Verifique as etapas: format, type-check, lint, test, build, deploy.
-4. Em caso de erro, baixe o artifact "build-logs-and-artifacts" para depuração.
-5. Confirme no Vercel que um novo deployment foi criado e promovido a produção.
+### Segredos Necessários (`Settings > Secrets and variables > Actions`)
 
-## Higiene de Repositório
+- `VERCEL_DEPLOY_HOOK_URL`
+- (Opcional) `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, `VERCEL_SCOPE` caso utilize deploy direto via API.
 
-- Diretórios de backup e exemplos são ignorados via `.gitignore` (`src_backup/`, `src_broken_*/`, `with-turbopack-*`, `archive/`).
-- Evite commitar assets locais temporários (`*.local.*.png/jpg`).
+## Branching & Deploy
 
-## Definition of Done (DoD)
+- **Trunk-Based**: `main` sempre pronta para deploy.
+- **Branches curtas**: Feature branches com PR obrigatório e revisão.
+- **Proteções**: Checks do GitHub Actions obrigatórios antes do merge.
+- **Deploy**: Cada merge em `main` dispara build+deploy no Vercel; monitorar em `https://vercel.com/coregomes/a-moita/`.
 
-- Projeto compila e roda localmente sem erros: `pnpm install && pnpm dev`.
-- Deploy automático funcionando a cada commit na branch principal: verifique badge acima e o workflow em Actions.
-- Logs de erro acessíveis e configurados: artifacts do job ("build-logs-and-artifacts") quando houver falha no pipeline.
+## Referências & Branding
+
+- Conteúdo visual, textos e identidade: [`www.moitanativa.com.br`](https://www.moitanativa.com.br).
+- Logotipos oficiais em `public/assets/branding/`.
+- Galeria curada em `public/assets/gallery/orefugio/`.
+
+## Roadmap & Pendências
+
+- Implementar suíte de testes (Playwright + Vitest).
+- Automatizar integração com Hostex (sincronização diária de ocupação).
+- Criar modo multilíngue (PT/EN) via `next-intl`.
+- Publicar blog dinâmico com CMS headless (Strapi ou Contentful).
+
+## Suporte & Contato
+
+- **Email**: `contato@moitanativa.com.br`
+- **Instagram**: `@moitanativa`
+- Para dúvidas técnicas, abra uma issue no GitHub.
 
 ## Licença
 
-Este projeto está sob a licença MIT.
+Distribuído sob licença **MIT**. Consulte `LICENSE` para detalhes.
