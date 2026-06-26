@@ -10,17 +10,45 @@ const figtree = Figtree({
 })
 
 export const metadata: Metadata = {
-  title: 'A Moita - Refúgio Natural',
+  title: 'A Moita — Refúgio Natural | Abadiânia-GO',
   description:
-    'Our commitment to green energy is paving the way for a cleaner, healthier planet. Join us on a journey towards a future where clean, renewable energy sources transform the way we power our lives.',
+    'Refúgio de ecoturismo no Cerrado. Chalés exclusivos às margens do Rio Capivari, em Abadiânia-GO.',
   keywords: [
-    'green energy',
-    'renewable energy',
-    'solar power',
-    'wind energy',
-    'sustainability',
+    'ecoturismo',
+    'chalé cerrado',
+    'Abadiânia',
+    'Rio Capivari',
+    'refúgio natural',
+    'hospedagem Goiás',
   ],
   authors: [{ name: 'A Moita' }],
+  alternates: {
+    canonical: 'https://www.moitanativa.com.br',
+  },
+  openGraph: {
+    title: 'A Moita — Refúgio Natural | Abadiânia-GO',
+    description:
+      'Refúgio de ecoturismo no Cerrado. Chalés exclusivos às margens do Rio Capivari, em Abadiânia-GO.',
+    url: 'https://www.moitanativa.com.br',
+    siteName: 'A Moita',
+    images: [
+      {
+        url: 'https://www.moitanativa.com.br/assets/branding/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'A Moita — Refúgio Natural no Cerrado',
+      },
+    ],
+    locale: 'pt_BR',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'A Moita — Refúgio Natural | Abadiânia-GO',
+    description:
+      'Refúgio de ecoturismo no Cerrado. Chalés exclusivos às margens do Rio Capivari.',
+    images: ['https://www.moitanativa.com.br/assets/branding/og-image.jpg'],
+  },
 }
 
 export const viewport: Viewport = {
@@ -39,7 +67,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={figtree.variable}>
+    <html lang="pt-BR" className={figtree.variable}>
       <head>
         <link rel="preconnect" href="https://fonts.gstatic.com" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
