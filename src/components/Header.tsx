@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { NAV_LINKS } from '@/lib/nav-links'
 
 interface HeaderProps {
   onReserveClick: () => void
@@ -42,24 +43,15 @@ export default function Header({
 
             {/* Desktop Navigation */}
             <div className="hidden items-center space-x-6 md:flex lg:space-x-8">
-              <Link
-                href="/"
-                className="text-base text-gray-100 transition-colors hover:text-gold-300 lg:text-lg"
-              >
-                Início
-              </Link>
-              <Link
-                href="/#nossos-pilares"
-                className="text-base text-gray-100 transition-colors hover:text-gold-300 lg:text-lg"
-              >
-                Sobre
-              </Link>
-              <Link
-                href="/#chales"
-                className="text-base text-gray-100 transition-colors hover:text-gold-300 lg:text-lg"
-              >
-                Chalés
-              </Link>
+              {NAV_LINKS.map(({ href, label }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className="text-base text-gray-100 transition-colors hover:text-gold-300 lg:text-lg"
+                >
+                  {label}
+                </Link>
+              ))}
               <button
                 onClick={onReserveClick}
                 className="rounded-full bg-gold-300 px-4 py-2 text-sm font-medium text-teal-900 transition-colors hover:bg-gold-400 lg:px-6 lg:text-base"
@@ -118,27 +110,16 @@ export default function Header({
             }`}
           >
             <div className="mt-4 space-y-2 rounded-lg bg-teal-800/95 px-4 pb-4 pt-2 shadow-lg backdrop-blur-sm">
-              <Link
-                href="/"
-                className="block rounded-md px-4 py-3 text-base font-medium text-gray-100 transition-colors hover:bg-teal-700/30"
-                onClick={() => setMobileNavOpen(false)}
-              >
-                Início
-              </Link>
-              <Link
-                href="/#nossos-pilares"
-                className="block rounded-md px-4 py-3 text-base font-medium text-gray-100 transition-colors hover:bg-teal-700/30"
-                onClick={() => setMobileNavOpen(false)}
-              >
-                Sobre
-              </Link>
-              <Link
-                href="/#chales"
-                className="block rounded-md px-4 py-3 text-base font-medium text-gray-100 transition-colors hover:bg-teal-700/30"
-                onClick={() => setMobileNavOpen(false)}
-              >
-                Chalés
-              </Link>
+              {NAV_LINKS.map(({ href, label }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className="block rounded-md px-4 py-3 text-base font-medium text-gray-100 transition-colors hover:bg-teal-700/30"
+                  onClick={() => setMobileNavOpen(false)}
+                >
+                  {label}
+                </Link>
+              ))}
               <button
                 onClick={() => {
                   onReserveClick()

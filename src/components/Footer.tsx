@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { NAV_LINKS } from '@/lib/nav-links'
 
 interface FooterProps {
   onReserveClick: () => void
@@ -72,30 +73,16 @@ export default function Footer({ onReserveClick }: FooterProps) {
                 Navegação
               </h3>
               <ul className="mt-4 space-y-2">
-                <li>
-                  <Link
-                    href="/"
-                    className="text-base text-gray-600 transition-colors hover:text-lime-600"
-                  >
-                    Início
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/#nossos-pilares"
-                    className="text-base text-gray-600 transition-colors hover:text-lime-600"
-                  >
-                    Sobre
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/#chales"
-                    className="text-base text-gray-600 transition-colors hover:text-lime-600"
-                  >
-                    Chalés
-                  </Link>
-                </li>
+                {NAV_LINKS.map(({ href, label }) => (
+                  <li key={href}>
+                    <Link
+                      href={href}
+                      className="text-base text-gray-600 transition-colors hover:text-lime-600"
+                    >
+                      {label}
+                    </Link>
+                  </li>
+                ))}
                 <li>
                   <button
                     onClick={onReserveClick}

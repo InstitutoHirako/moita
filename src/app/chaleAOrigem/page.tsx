@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
-import { motion } from 'framer-motion'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { analytics, initScrollTracking } from '@/lib/analytics'
@@ -12,12 +11,53 @@ import {
   buildBookingUrl,
 } from '@/lib/hostex/constants'
 
-// Resolve listing for this property (A Origem)
+type HostexWindow = Window & { hostexWidget?: { init?: () => void } }
+
 const ORIGEM_LISTING = getListing('origem')
+const MAP_URL = 'https://maps.app.goo.gl/sc86nBWqpmRsiL4u7'
+
+const amenities: { label: string; paths: string[] }[] = [
+  {
+    label: 'Wi-Fi',
+    paths: [
+      'M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0',
+    ],
+  },
+  {
+    label: 'Cozinha',
+    paths: [
+      'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6',
+    ],
+  },
+  {
+    label: 'Estacionamento gratuito',
+    paths: [
+      'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z',
+      'M15 11a3 3 0 11-6 0 3 3 0 016 0z',
+    ],
+  },
+  {
+    label: 'Natureza preservada',
+    paths: [
+      'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z',
+    ],
+  },
+  {
+    label: 'Limpeza profissional',
+    paths: ['M9 12l2-2 4-4m6 4l-4 4m6-4l-4-4'],
+  },
+  {
+    label: 'Vista para o Cerrado',
+    paths: [
+      'M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707',
+    ],
+  },
+]
 
 export default function ChaleAOrigemPage() {
   const [selectedImage, setSelectedImage] = useState(0)
   const [showAllPhotos, setShowAllPhotos] = useState(false)
+  const [showMapModal, setShowMapModal] = useState(false)
   const [hostexLoaded, setHostexLoaded] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [bookingParams, setBookingParams] = useState({
@@ -34,15 +74,9 @@ export default function ChaleAOrigemPage() {
   ]
 
   useEffect(() => {
-    // Mark as mounted to avoid SSR rendering of client-only parts
     setMounted(true)
-
-    // Track property view
     analytics.trackPropertyView('Chalé A Origem', 'direct')
-
-    // Initialize scroll tracking
     const cleanupScroll = initScrollTracking()
-
     return cleanupScroll
   }, [])
 
@@ -57,7 +91,6 @@ export default function ChaleAOrigemPage() {
       ''
     const guests =
       url.searchParams.get('guests') || url.searchParams.get('adults') || '1'
-
     setBookingParams({ checkin, checkout, guests })
   }, [])
 
@@ -81,11 +114,9 @@ export default function ChaleAOrigemPage() {
     script.onload = () => {
       setHostexLoaded(true)
       setTimeout(() => {
-        if (
-          window.hostexWidget &&
-          typeof window.hostexWidget.init === 'function'
-        ) {
-          window.hostexWidget.init()
+        const hw = (window as HostexWindow).hostexWidget
+        if (hw && typeof hw.init === 'function') {
+          hw.init()
         }
       }, 100)
     }
@@ -94,119 +125,37 @@ export default function ChaleAOrigemPage() {
       console.error('Failed to load Hostex widget script')
     }
 
-    if (typeof document !== 'undefined') {
-      document.head.appendChild(script)
-    }
-
-    return () => {
-      // Don't remove script on unmount to avoid reload issues
-      // The script should persist across navigation
-    }
+    document.head.appendChild(script)
   }, [])
 
   const handleBookingClick = () => {
     analytics.trackCTAClick('reservar_header', 'chale_origem_page')
     analytics.trackReservationStart('Chalé A Origem')
-
-    const bookingUrl = buildBookingUrl('origem')
-    window.open(bookingUrl, '_blank', 'width=800,height=600')
+    window.open(buildBookingUrl('origem'), '_blank', 'width=800,height=600')
   }
 
   const handleMapClick = () => {
     analytics.trackPropertyInterest('Chalé A Origem', 'location')
-
-    const mapUrl = 'https://maps.app.goo.gl/sc86nBWqpmRsiL4u7'
-
     const isMobile =
       /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
         navigator.userAgent
       )
-
     if (isMobile) {
-      const userChoice = window.confirm(
-        'Abrir localização no:\n\nOK = Google Maps\nCancelar = Escolher app'
-      )
-
-      if (userChoice) {
-        window.open(mapUrl, '_blank')
-      } else {
-        const modal = document.createElement('div')
-        modal.style.cssText = `
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(0,0,0,0.8);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 9999;
-          padding: 20px;
-        `
-
-        modal.innerHTML = `
-          <div style="background: white; border-radius: 12px; padding: 24px; max-width: 300px; width: 100%;">
-            <h3 style="margin: 0 0 16px 0; text-align: center; color: #0D2B24;">Abrir no:</h3>
-            <div style="display: flex; flex-direction: column; gap: 12px;">
-              <button onclick="window.open('${mapUrl}', '_blank'); document.body.removeChild(this.closest('div').parentElement)" 
-                style="padding: 12px; border: 1px solid #0D2B24; border-radius: 8px; background: white; color: #0D2B24; font-weight: 500;">
-                Google Maps
-              </button>
-              <button onclick="window.open('https://maps.apple.com/?q=-15.9578,-48.1234', '_blank'); document.body.removeChild(this.closest('div').parentElement)" 
-                style="padding: 12px; border: 1px solid #0D2B24; border-radius: 8px; background: white; color: #0D2B24; font-weight: 500;">
-                Apple Maps
-              </button>
-              <button onclick="window.open('waze://?q=-15.9578,-48.1234', '_blank'); document.body.removeChild(this.closest('div').parentElement)" 
-                style="padding: 12px; border: 1px solid #0D2B24; border-radius: 8px; background: white; color: #0D2B24; font-weight: 500;">
-                Waze
-              </button>
-              <button onclick="document.body.removeChild(this.closest('div').parentElement)" 
-                style="padding: 12px; border: none; border-radius: 8px; background: #f3f4f6; color: #6b7280; font-weight: 500; margin-top: 8px;">
-                Cancelar
-              </button>
-            </div>
-          </div>
-        `
-
-        document.body.appendChild(modal)
-      }
+      setShowMapModal(true)
     } else {
-      window.open(mapUrl, '_blank')
+      window.open(MAP_URL, '_blank')
     }
   }
 
   useEffect(() => {
-    if (hostexLoaded && mounted) {
-      const timer = setTimeout(() => {
-        if (typeof document === 'undefined' || typeof window === 'undefined')
-          return
-
-        // Initialize only the booking widget on the property page
-        const widgetContainer = document.getElementById(
-          'hostex-widget-container'
-        )
-        if (widgetContainer && (window as any).hostexWidget) {
-          widgetContainer.innerHTML = `
-            <hostex-booking-widget 
-              listing-id="${ORIGEM_LISTING.listingId}"
-              id="${HOSTEX_WIDGET_ID}"
-              ${bookingParams.checkin ? `checkin="${bookingParams.checkin}"` : ''}
-              ${bookingParams.checkout ? `checkout="${bookingParams.checkout}"` : ''}
-              ${bookingParams.guests ? `guests="${bookingParams.guests}"` : ''}
-            ></hostex-booking-widget>
-          `
-        }
-
-        // Initialize widgets (guard against undefined)
-        const hw = (window as any).hostexWidget
-        if (hw && typeof hw.init === 'function') {
-          hw.init()
-        }
-      }, 300)
-
-      return () => clearTimeout(timer)
-    }
+    if (!hostexLoaded || !mounted) return
+    const timer = setTimeout(() => {
+      const hw = (window as HostexWindow).hostexWidget
+      if (hw && typeof hw.init === 'function') {
+        hw.init()
+      }
+    }, 300)
+    return () => clearTimeout(timer)
   }, [hostexLoaded, mounted, bookingParams])
 
   return (
@@ -216,12 +165,10 @@ export default function ChaleAOrigemPage() {
         bgImage="/assets/backgrounds/bg-waves.png"
       />
 
-      {/* Main Content */}
       <main className="pb-12">
         {/* Photo Gallery Section */}
         <section className="relative">
           <div className="container mx-auto px-4 py-6">
-            {/* Mobile Gallery */}
             <div className="md:hidden">
               <div className="relative aspect-[4/3] overflow-hidden rounded-xl">
                 <Image
@@ -245,7 +192,6 @@ export default function ChaleAOrigemPage() {
               </div>
             </div>
 
-            {/* Desktop Gallery */}
             <div className="hidden md:block">
               <div className="grid grid-cols-4 gap-2 overflow-hidden rounded-xl">
                 <div className="col-span-2 row-span-2">
@@ -287,7 +233,6 @@ export default function ChaleAOrigemPage() {
         <section className="border-b border-gray-200">
           <div className="container mx-auto px-4 py-8">
             <div className="grid gap-8 lg:grid-cols-3">
-              {/* Left Column - Property Info */}
               <div className="lg:col-span-2">
                 <div className="mb-6">
                   <h1 className="mb-2 text-2xl font-semibold text-gray-900 md:text-3xl">
@@ -350,114 +295,27 @@ export default function ChaleAOrigemPage() {
                     O que este lugar oferece
                   </h2>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div className="flex items-center space-x-3">
-                      <svg
-                        className="h-5 w-5 text-gray-600"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"
-                        />
-                      </svg>
-                      <span className="text-gray-700">Wi-Fi</span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <svg
-                        className="h-5 w-5 text-gray-600"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-                        />
-                      </svg>
-                      <span className="text-gray-700">Cozinha</span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <svg
-                        className="h-5 w-5 text-gray-600"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                        />
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                        />
-                      </svg>
-                      <span className="text-gray-700">
-                        Estacionamento gratuito
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <svg
-                        className="h-5 w-5 text-gray-600"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                        />
-                      </svg>
-                      <span className="text-gray-700">Natureza preservada</span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <svg
-                        className="h-5 w-5 text-gray-600"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 12l2-2 4-4m6 4l-4 4m6-4l-4-4"
-                        />
-                      </svg>
-                      <span className="text-gray-700">
-                        Limpeza profissional
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <svg
-                        className="h-5 w-5 text-gray-600"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707"
-                        />
-                      </svg>
-                      <span className="text-gray-700">
-                        Vista para o Cerrado
-                      </span>
-                    </div>
+                    {amenities.map(({ label, paths }) => (
+                      <div key={label} className="flex items-center space-x-3">
+                        <svg
+                          className="h-5 w-5 text-gray-600"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          {paths.map((d) => (
+                            <path
+                              key={d}
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d={d}
+                            />
+                          ))}
+                        </svg>
+                        <span className="text-gray-700">{label}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -465,70 +323,64 @@ export default function ChaleAOrigemPage() {
               {/* Right Column - Booking Widget */}
               <div className="lg:col-span-1">
                 <div className="sticky top-8">
-                  <div className="space-y-6">
-                    {/* Hostex Booking Widget */}
-                    <div className="hostex-booking-container mb-6">
-                      <style jsx>{`
-                        .hostex-booking-container {
-                          width: 100%;
-                          min-height: 400px;
-                          border: 1px solid #e5e7eb;
-                          border-radius: 12px;
-                          padding: 16px;
-                          background: white;
-                        }
-                        #hostex-widget-container {
-                          width: 100%;
-                          min-height: 400px;
-                        }
-                        #hostex-widget-container hostex-booking-widget {
-                          width: 100%;
-                          display: block;
-                          min-height: 400px;
-                        }
-                      `}</style>
+                  <div className="hostex-booking-container mb-6">
+                    <style jsx>{`
+                      .hostex-booking-container {
+                        width: 100%;
+                        min-height: 400px;
+                        border: 1px solid #e5e7eb;
+                        border-radius: 12px;
+                        padding: 16px;
+                        background: white;
+                      }
+                      #hostex-widget-container {
+                        width: 100%;
+                        min-height: 400px;
+                      }
+                      #hostex-widget-container hostex-booking-widget {
+                        width: 100%;
+                        display: block;
+                        min-height: 400px;
+                      }
+                    `}</style>
 
-                      {mounted && hostexLoaded ? (
-                        <div id="hostex-widget-container">
-                          <div
-                            onClick={() =>
-                              analytics.trackReservationStep(
-                                'widget_interaction',
-                                'Chalé A Origem'
-                              )
-                            }
-                          >
-                            <hostex-booking-widget
-                              listing-id={ORIGEM_LISTING.listingId}
-                              id={HOSTEX_WIDGET_ID}
-                              checkin={bookingParams.checkin || ''}
-                              checkout={bookingParams.checkout || ''}
-                              guests={bookingParams.guests || '1'}
-                            />
-                          </div>
-                        </div>
-                      ) : (
+                    {mounted && hostexLoaded ? (
+                      <div id="hostex-widget-container">
                         <div
-                          className="loading-placeholder"
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            minHeight: '400px',
-                            background: '#f9fafb',
-                            borderRadius: '8px',
-                            color: '#6b7280',
-                          }}
+                          onClick={() =>
+                            analytics.trackReservationStep(
+                              'widget_interaction',
+                              'Chalé A Origem'
+                            )
+                          }
                         >
-                          <div className="text-center">
-                            <div className="mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-b-2 border-teal-600"></div>
-                            <p>Carregando calendário...</p>
-                          </div>
+                          <hostex-booking-widget
+                            listing-id={ORIGEM_LISTING.listingId}
+                            id={HOSTEX_WIDGET_ID}
+                            checkin={bookingParams.checkin || ''}
+                            checkout={bookingParams.checkout || ''}
+                            guests={bookingParams.guests || '1'}
+                          />
                         </div>
-                      )}
-                    </div>
-
-                    {/* Removido: CTA externo de reserva. Toda a ação de reserva fica dentro do widget Hostex. */}
+                      </div>
+                    ) : (
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          minHeight: '400px',
+                          background: '#f9fafb',
+                          borderRadius: '8px',
+                          color: '#6b7280',
+                        }}
+                      >
+                        <div className="text-center">
+                          <div className="mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-b-2 border-teal-600"></div>
+                          <p>Carregando calendário...</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -536,7 +388,7 @@ export default function ChaleAOrigemPage() {
           </div>
         </section>
 
-        {/* Reviews + Map side-by-side (responsive) */}
+        {/* Reviews + Map */}
         <section className="border-t border-gray-200">
           <div className="container mx-auto px-4 py-8">
             {(() => {
@@ -554,10 +406,8 @@ export default function ChaleAOrigemPage() {
                   text: 'Local perfeito para descansar e se reconectar. A hospitalidade é excepcional e o ambiente é muito bem cuidado. Voltaremos com certeza!',
                 },
               ]
-              const lastTwo = reviews.slice(-2)
               return (
                 <div className="grid gap-8 md:grid-cols-5">
-                  {/* Left: Reviews (2 últimas) */}
                   <div className="md:col-span-2">
                     <div className="mb-4 flex items-center space-x-3">
                       <h2 className="text-xl font-semibold text-gray-900">
@@ -576,7 +426,7 @@ export default function ChaleAOrigemPage() {
                       </div>
                     </div>
                     <div className="grid gap-4">
-                      {lastTwo.map((r, idx) => (
+                      {reviews.map((r, idx) => (
                         <div
                           key={idx}
                           className="rounded-lg border border-gray-200 p-5"
@@ -594,13 +444,12 @@ export default function ChaleAOrigemPage() {
                               <p className="text-sm text-gray-600">{r.date}</p>
                             </div>
                           </div>
-                          <p className="text-gray-700">“{r.text}”</p>
+                          <p className="text-gray-700">&quot;{r.text}&quot;</p>
                         </div>
                       ))}
                     </div>
                   </div>
 
-                  {/* Right: Map */}
                   <div className="md:col-span-3">
                     <h2 className="mb-1 text-xl font-semibold text-gray-900">
                       Onde você estará
@@ -618,7 +467,6 @@ export default function ChaleAOrigemPage() {
                           loading="lazy"
                           referrerPolicy="no-referrer-when-downgrade"
                           src={
-                            // Force a marker using Plus Code and tighten zoom for clarity
                             'https://www.google.com/maps?&q=' +
                             encodeURIComponent('V4VF+XC, Abadiânia, Goiás') +
                             '&markers=' +
@@ -626,7 +474,6 @@ export default function ChaleAOrigemPage() {
                             '&z=17&hl=pt-BR&output=embed'
                           }
                         />
-                        {/* Always-visible pin overlay (does not block interactions) */}
                         <div
                           aria-hidden
                           className="pointer-events-none absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2"
@@ -645,23 +492,12 @@ export default function ChaleAOrigemPage() {
                         </div>
                       </div>
                       <div className="px-4 pb-4 text-sm text-teal-700">
-                        <a
-                          href={
-                            'https://www.google.com/maps/search/?api=1&query=' +
-                            encodeURIComponent('V4VF+XC, Abadiânia, Goiás')
-                          }
-                          target="_blank"
-                          rel="noopener noreferrer"
+                        <button
+                          onClick={handleMapClick}
                           className="inline-block font-medium hover:underline"
-                          onClick={() =>
-                            analytics.trackOutboundLink(
-                              'https://www.google.com/maps/search/?api=1&query=V4VF+XC, Abadiânia, Goiás',
-                              'Ver no Google Maps'
-                            )
-                          }
                         >
                           Ver no Google Maps (abrir em nova aba)
-                        </a>
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -708,6 +544,53 @@ export default function ChaleAOrigemPage() {
                   />
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Map App Chooser Modal (mobile) */}
+      {showMapModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-5"
+          onClick={() => setShowMapModal(false)}
+        >
+          <div
+            className="w-full max-w-xs rounded-xl bg-white p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="mb-4 text-center font-semibold text-teal-900">
+              Abrir no:
+            </h3>
+            <div className="flex flex-col gap-3">
+              {[
+                { label: 'Google Maps', href: MAP_URL },
+                {
+                  label: 'Apple Maps',
+                  href: 'https://maps.apple.com/?q=-15.9578,-48.1234',
+                },
+                {
+                  label: 'Waze',
+                  href: 'waze://?q=-15.9578,-48.1234',
+                },
+              ].map(({ label, href }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-lg border border-teal-900 px-4 py-3 text-center font-medium text-teal-900 hover:bg-teal-50"
+                  onClick={() => setShowMapModal(false)}
+                >
+                  {label}
+                </a>
+              ))}
+              <button
+                onClick={() => setShowMapModal(false)}
+                className="mt-2 rounded-lg bg-gray-100 px-4 py-3 font-medium text-gray-500"
+              >
+                Cancelar
+              </button>
             </div>
           </div>
         </div>
