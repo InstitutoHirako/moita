@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
 import { analytics, initScrollTracking } from '@/lib/analytics'
 import {
   HOSTEX_WIDGET_ID,
@@ -105,70 +104,6 @@ export default function ChaleAOrigemClient() {
     window.open(bookingUrl, '_blank', 'width=800,height=600')
   }
 
-  const handleMapClick = () => {
-    analytics.trackPropertyInterest('Chalé A Origem', 'location')
-
-    const mapUrl = 'https://maps.app.goo.gl/sc86nBWqpmRsiL4u7'
-
-    const isMobile =
-      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent
-      )
-
-    if (isMobile) {
-      const userChoice = window.confirm(
-        'Abrir localização no:\n\nOK = Google Maps\nCancelar = Escolher app'
-      )
-
-      if (userChoice) {
-        window.open(mapUrl, '_blank')
-      } else {
-        const modal = document.createElement('div')
-        modal.style.cssText = `
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(0,0,0,0.8);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 9999;
-          padding: 20px;
-        `
-
-        modal.innerHTML = `
-          <div style="background: white; border-radius: 12px; padding: 24px; max-width: 300px; width: 100%;">
-            <h3 style="margin: 0 0 16px 0; text-align: center; color: #0D2B24;">Abrir no:</h3>
-            <div style="display: flex; flex-direction: column; gap: 12px;">
-              <button onclick="window.open('${mapUrl}', '_blank'); document.body.removeChild(this.closest('div').parentElement)"
-                style="padding: 12px; border: 1px solid #0D2B24; border-radius: 8px; background: white; color: #0D2B24; font-weight: 500;">
-                Google Maps
-              </button>
-              <button onclick="window.open('https://maps.apple.com/?q=-15.9578,-48.1234', '_blank'); document.body.removeChild(this.closest('div').parentElement)"
-                style="padding: 12px; border: 1px solid #0D2B24; border-radius: 8px; background: white; color: #0D2B24; font-weight: 500;">
-                Apple Maps
-              </button>
-              <button onclick="window.open('waze://?q=-15.9578,-48.1234', '_blank'); document.body.removeChild(this.closest('div').parentElement)"
-                style="padding: 12px; border: 1px solid #0D2B24; border-radius: 8px; background: white; color: #0D2B24; font-weight: 500;">
-                Waze
-              </button>
-              <button onclick="document.body.removeChild(this.closest('div').parentElement)"
-                style="padding: 12px; border: none; border-radius: 8px; background: #f3f4f6; color: #6b7280; font-weight: 500; margin-top: 8px;">
-                Cancelar
-              </button>
-            </div>
-          </div>
-        `
-
-        document.body.appendChild(modal)
-      }
-    } else {
-      window.open(mapUrl, '_blank')
-    }
-  }
-
   useEffect(() => {
     if (hostexLoaded && mounted) {
       const timer = setTimeout(() => {
@@ -229,31 +164,30 @@ export default function ChaleAOrigemClient() {
 
               {/* Desktop Navigation */}
               <div className="hidden items-center space-x-6 md:flex lg:space-x-8">
-                <a
-                  href="#"
+                <Link
+                  href="/"
                   className="text-base text-gray-100 transition-colors hover:text-gold-300 lg:text-lg"
                 >
                   Início
-                </a>
+                </Link>
                 <a
-                  href="#nossos-pilares"
+                  href="/#nossos-pilares"
                   className="text-base text-gray-100 transition-colors hover:text-gold-300 lg:text-lg"
                 >
                   Sobre
                 </a>
                 <a
-                  href="#chales"
+                  href="/#chales"
                   className="text-base text-gray-100 transition-colors hover:text-gold-300 lg:text-lg"
                 >
                   Chalés
                 </a>
-                <a
-                  href="#"
+                <button
                   onClick={handleBookingClick}
                   className="rounded-full bg-gold-300 px-4 py-2 text-sm font-medium text-teal-900 transition-colors hover:bg-gold-400 lg:px-6 lg:text-base"
                 >
                   Reservar
-                </a>
+                </button>
               </div>
 
               {/* Mobile menu button */}
@@ -306,38 +240,36 @@ export default function ChaleAOrigemClient() {
               }`}
             >
               <div className="mt-4 space-y-2 rounded-lg bg-teal-800/95 px-4 pb-4 pt-2 shadow-lg backdrop-blur-sm">
-                <a
-                  href="#"
+                <Link
+                  href="/"
                   className="block rounded-md px-4 py-3 text-base font-medium text-gray-100 transition-colors hover:bg-teal-700/30"
                   onClick={() => setMobileNavOpen(false)}
                 >
                   Início
-                </a>
+                </Link>
                 <a
-                  href="#nossos-pilares"
+                  href="/#nossos-pilares"
                   className="block rounded-md px-4 py-3 text-base font-medium text-gray-100 transition-colors hover:bg-teal-700/30"
                   onClick={() => setMobileNavOpen(false)}
                 >
                   Sobre
                 </a>
                 <a
-                  href="#chales"
+                  href="/#chales"
                   className="block rounded-md px-4 py-3 text-base font-medium text-gray-100 transition-colors hover:bg-teal-700/30"
                   onClick={() => setMobileNavOpen(false)}
                 >
                   Chalés
                 </a>
-                <a
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault()
+                <button
+                  onClick={() => {
                     handleBookingClick()
                     setMobileNavOpen(false)
                   }}
                   className="mt-2 block w-full rounded-full bg-gold-300 px-6 py-2 text-center font-medium text-teal-900 transition-colors hover:bg-gold-400"
                 >
                   Reservar
-                </a>
+                </button>
               </div>
             </div>
           </div>
@@ -362,7 +294,7 @@ export default function ChaleAOrigemClient() {
                 <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 space-x-2">
                   {images.map((_, index) => (
                     <button
-                      key={index}
+                      key={images[index]}
                       onClick={() => setSelectedImage(index)}
                       className={`h-2 w-2 rounded-full ${
                         index === selectedImage ? 'bg-white' : 'bg-white/50'
@@ -388,7 +320,7 @@ export default function ChaleAOrigemClient() {
                   </div>
                 </div>
                 {images.slice(1).map((image, index) => (
-                  <div key={index} className="relative aspect-square">
+                  <div key={image} className="relative aspect-square">
                     <Image
                       src={image}
                       alt={`Chalé A Origem - Foto ${index + 2}`}
@@ -619,6 +551,7 @@ export default function ChaleAOrigemClient() {
                       {mounted && hostexLoaded ? (
                         <div id="hostex-widget-container">
                           <div
+                            role="presentation"
                             onClick={() =>
                               analytics.trackReservationStep(
                                 'widget_interaction',
@@ -702,9 +635,9 @@ export default function ChaleAOrigemClient() {
                       </div>
                     </div>
                     <div className="grid gap-4">
-                      {lastTwo.map((r, idx) => (
+                      {lastTwo.map((r) => (
                         <div
-                          key={idx}
+                          key={r.name}
                           className="rounded-lg border border-gray-200 p-5"
                         >
                           <div className="mb-3 flex items-center space-x-3">
@@ -887,13 +820,12 @@ export default function ChaleAOrigemClient() {
                     </Link>
                   </li>
                   <li>
-                    <a
-                      href="#"
+                    <button
                       onClick={handleBookingClick}
                       className="text-base text-gray-600 transition-colors hover:text-lime-600"
                     >
                       Reservar
-                    </a>
+                    </button>
                   </li>
                 </ul>
               </div>
@@ -948,7 +880,7 @@ export default function ChaleAOrigemClient() {
             </button>
             <div className="grid grid-cols-2 gap-4">
               {images.map((image, index) => (
-                <div key={index} className="relative aspect-square">
+                <div key={image} className="relative aspect-square">
                   <Image
                     src={image}
                     alt={`Chalé A Origem - Foto ${index + 1}`}
