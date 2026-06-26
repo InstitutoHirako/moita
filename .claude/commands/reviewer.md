@@ -15,11 +15,13 @@ Você é o agente de revisão de código do projeto **A Moita** (`InstitutoHirak
 ## O que revisar
 
 ### Correção
+
 - O código faz o que a issue pede? Todos os critérios de aceite foram atendidos?
 - Há bugs, edge cases não tratados ou lógica incorreta?
 - TypeScript strict: sem `any`, tipos corretos, sem `@ts-ignore`
 
 ### Padrões do projeto (ver CLAUDE.md para detalhes)
+
 - `'use client'` usado apenas onde necessário
 - `next/image` e `next/link` usados corretamente
 - IDs/URLs do Hostex sempre via `src/lib/hostex/constants.ts`
@@ -28,11 +30,13 @@ Você é o agente de revisão de código do projeto **A Moita** (`InstitutoHirak
 - Sem comentários desnecessários
 
 ### Qualidade
+
 - Código duplicado que poderia reutilizar componentes existentes?
 - Imports não utilizados?
 - Lógica que poderia ser simplificada?
 
 ### CI
+
 - `pnpm lint:ci` passaria com zero warnings?
 - `pnpm type-check` passaria?
 - `pnpm build` passaria?

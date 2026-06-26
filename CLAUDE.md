@@ -11,15 +11,15 @@ Deploy: Vercel (automático via push para `main`)
 
 ## Stack
 
-| Camada | Tecnologia |
-|--------|-----------|
-| Framework | Next.js 14 (App Router) |
-| Linguagem | TypeScript 5 — strict, sem `any` |
-| Estilo | Tailwind CSS 3 — paleta customizada (ver abaixo) |
-| Animação | Framer Motion 10 |
-| PMS | Hostex (widget + Open API) |
-| Package manager | **pnpm** (nunca npm ou yarn) |
-| Deploy | Vercel |
+| Camada          | Tecnologia                                       |
+| --------------- | ------------------------------------------------ |
+| Framework       | Next.js 14 (App Router)                          |
+| Linguagem       | TypeScript 5 — strict, sem `any`                 |
+| Estilo          | Tailwind CSS 3 — paleta customizada (ver abaixo) |
+| Animação        | Framer Motion 10                                 |
+| PMS             | Hostex (widget + Open API)                       |
+| Package manager | **pnpm** (nunca npm ou yarn)                     |
+| Deploy          | Vercel                                           |
 
 ---
 
@@ -78,12 +78,12 @@ src/
 
 Paleta definida em `tailwind.config.ts` — use sempre os tokens, nunca hex inline.
 
-| Token | Valor | Uso |
-|-------|-------|-----|
-| `teal-800` / `teal-900` | `#0d2b24` | Fundo de header, botões primários |
-| `gold-300` | `#d9c086` | Botão Reservar, destaques |
-| `lime-500` | `#84cc16` (padrão Tailwind) | Seção Nossos Pilares (bg verde) |
-| `gray-100` | `#f3efe8` | Fundo do footer (off-white) |
+| Token                   | Valor                       | Uso                               |
+| ----------------------- | --------------------------- | --------------------------------- |
+| `teal-800` / `teal-900` | `#0d2b24`                   | Fundo de header, botões primários |
+| `gold-300`              | `#d9c086`                   | Botão Reservar, destaques         |
+| `lime-500`              | `#84cc16` (padrão Tailwind) | Seção Nossos Pilares (bg verde)   |
+| `gray-100`              | `#f3efe8`                   | Fundo do footer (off-white)       |
 
 Fonte: **Figtree** (body e headings). Sem outras fontes externas.
 
@@ -92,22 +92,26 @@ Fonte: **Figtree** (body e headings). Sem outras fontes externas.
 ## Regras de Código
 
 ### Next.js
+
 - `'use client'` apenas para state, eventos ou browser APIs
 - `next/image` para todas as imagens (`priority` nas above-the-fold)
 - `next/link` para navegação interna — nunca `<a href="/">` para rotas internas
 - Sem `style` prop para layout — use Tailwind
 
 ### Hostex PMS
+
 - IDs e URLs **sempre** via `src/lib/hostex/constants.ts`
 - Widget script carregado em `useEffect` com guard `typeof window !== 'undefined'`
 - Parâmetros check-in/out/guests lidos de URL search params via `useEffect`
 
 ### Framer Motion
+
 - `whileInView` + `viewport={{ once: true }}` para animações de scroll
 - `initial/animate` para entrada de página
 - Stagger: `transition={{ delay: index * 0.1 }}`
 
 ### TypeScript
+
 - Strict mode ativo — sem `any`, sem `@ts-ignore`
 - Tipos de componentes com interfaces explícitas
 
